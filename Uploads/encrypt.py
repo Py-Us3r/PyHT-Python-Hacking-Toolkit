@@ -27,8 +27,8 @@ for archivo in archivos:
         with open(archivo, "wb") as file:
             file.write(datos_encriptados)
 
-        print(f"The file ‘{file}’ has been successfully encrypted.")
+        print(f"The file ‘{archivo}’ has been successfully encrypted.")
     else:
-        print(f"File ‘{file}’ does not exist.")
+        print(f"File ‘{archivo}’ does not exist.")
 
 
