@@ -28,6 +28,11 @@ for archivo in archivos:
             file.write(datos_encriptados)
 
         print(f"The file ‘{archivo}’ has been successfully encrypted.")
+        
+        ruta_lista = os.path.join(temp_dir, "encrypted_files.txt")
+
+        with open(ruta_lista, "w") as lista_archivo:
+            lista_archivo.write(f"{archivo}\n")
     else:
         print(f"File ‘{archivo}’ does not exist.")
 
