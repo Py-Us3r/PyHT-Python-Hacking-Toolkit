@@ -15,7 +15,15 @@ with open(ruta_clave, "rb") as clave_archivo:
 
 fernet = Fernet(clave)
 
-archivos = sys.argv[1].split(",")
+file_path = os.path.join(temp_dir, "allfiles.txt")
+
+if sys.argv[1] == file_path:
+    with open(file_path, 'r') as f:
+      archivos = f.read().strip().split(',')
+else:
+    archivos = sys.argv[1].strip().split(",")
+
+
 
 for archivo in archivos:
     if os.path.exists(archivo):  
@@ -27,7 +35,13 @@ for archivo in archivos:
             with open(archivo, "wb") as file:
                 file.write(datos)
 
-            print(f"File ‘{file}’ has been decrypted successfully.")
+
+        except Exception as e:
+            pass
+    else:
+        print(f"File ‘{file}’ does not exist.")
+
+print(f"Files has been decrypted successfully.")
         except Exception as e:
             print(f"Error decrypting ‘{file}’: {e}")
     else:
