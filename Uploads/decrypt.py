@@ -22,27 +22,3 @@ if sys.argv[1] == file_path:
       archivos = f.read().strip().split(',')
 else:
     archivos = sys.argv[1].strip().split(",")
-
-
-
-for archivo in archivos:
-    if os.path.exists(archivo):  
-        with open(archivo, "rb") as file:
-            datos_encriptados = file.read() 
-
-        try:
-            datos = fernet.decrypt(datos_encriptados)
-            with open(archivo, "wb") as file:
-                file.write(datos)
-
-
-        except Exception as e:
-            pass
-    else:
-        print(f"File ‘{file}’ does not exist.")
-
-print(f"Files has been decrypted successfully.")
-        except Exception as e:
-            print(f"Error decrypting ‘{file}’: {e}")
-    else:
-        print(f"File ‘{file}’ does not exist.")
