@@ -2,43 +2,42 @@ import sys
 from cryptography.fernet import Fernet
 import os
 
-temp_dir = os.path.expandvars(r"%APPDATA%")
+decrypted_files = []
 
-ruta_clave = os.path.join(temp_dir, "clave.key")
+appdata_dir = os.path.expandvars(r"%APPDATA%")
+temp_dir = os.path.expandvars(r"%tmp%")
 
-if not os.path.exists(ruta_clave):
+key_path = os.path.join(temp_dir, "pass.key")
+
+if not os.path.exists(key_path):
     print("Key file does not exist.")
     sys.exit(1)
 
-with open(ruta_clave, "rb") as clave_archivo:
-    clave = clave_archivo.read()
+with open(key_path, "rb") as key_file:
+    decryption_key = key_file.read()
 
-fernet = Fernet(clave)
+fernet = Fernet(decryption_key)
 
-file_path = os.path.join(temp_dir, "allfiles.txt")
+file_list_path = os.path.join(appdata_dir, "allfiles.txt")
 
-if sys.argv[1] == file_path:
-    with open(file_path, 'r') as f:
-      archivos = f.read().strip().split(',')
+if sys.argv[1] == file_list_path:
+    with open(file_list_path, 'r') as f:
+        file_list = f.read().strip().split(',')
 else:
-    archivos = sys.argv[1].strip().split(",")
+    file_list = sys.argv[1].strip().split(",")
 
-
-
-for archivo in archivos:
-    if os.path.exists(archivo):  
-        with open(archivo, "rb") as file:
-            datos_encriptados = file.read() 
-
+for file_path in file_list:
+    if os.path.exists(file_path):
+        with open(file_path, "rb") as f:
+            encrypted_data = f.read()
         try:
-            datos = fernet.decrypt(datos_encriptados)
-            with open(archivo, "wb") as file:
-                file.write(datos)
-
-
-        except Exception as e:
+            decrypted_data = fernet.decrypt(encrypted_data)
+            with open(file_path, "wb") as f:
+                f.write(decrypted_data)
+            decrypted_files.append(file_path)
+        except Exception:
             pass
     else:
-        print(f"File ‘{archivo}’ does not exist.")
+        print(f"File '{file_path}' does not exist.")
 
-print(f"Files has been decrypted successfully.")
+print(f"Files {decrypted_files} have been decrypted successfully.")
