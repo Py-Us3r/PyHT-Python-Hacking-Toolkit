@@ -1,0 +1,7 @@
+customtkinter
+netifaces
+requests
+Pillow
+scapy
+CTkMessagebox
+pycryptodome
