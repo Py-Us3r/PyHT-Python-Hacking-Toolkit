@@ -2,6 +2,25 @@
 
 ![PyHT Logo](https://github.com/user-attachments/assets/bf1f9276-476e-4aab-964d-1eb864cb3676)
 
+## Installation 
+
+```bash
+sudo apt update && sudo apt upgrade -y
+```
+
+```bash
+git clone https://github.com/Py-Us3r/PyHT-Python-Hacking-Toolkit.git
+cd PyHT-Python-Hacking-Toolkit
+```
+
+```bash
+python -m venv venv && source venv/bin/activate && pip install -r requirements.txt
+```
+
+```bash
+python3 main.py
+```
+
 ## Port Scanner
 
 [![](https://github.com/user-attachments/assets/92c4eef2-0d6b-4b04-a6d0-fbac57f0f714)](https://youtu.be/cpU3s4uIS5k)
