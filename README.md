@@ -74,7 +74,15 @@ python3 main.py
 
 [![](https://github.com/user-attachments/assets/4cfa1812-30e2-4a9a-9de1-cda2a9fc1126)](https://youtu.be/R4FjesFfFlQ)
 
-> Comming soon...
+> This module provides a graphical packet sniffer that allows you to monitor and analyze network traffic in real time. Designed for use in authorized environments, it supports three distinct sniffing modes:
+
+🔍 Modes:
+
+- Normal Sniffing: Captures and displays a live summary of all network packets on the selected interface.
+
+- DNS Sniffing: Filters and displays only DNS queries (UDP port 53), allowing users to see domain requests made by the system. Common domains like Google or Bing are ignored for clarity.
+
+- HTTP Sniffing: Captures HTTP requests, shows visited URLs, and scans raw packet data for potential credential keywords such as pass, login, or user.
 
 ## Command & Control (C2)
 
