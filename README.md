@@ -2,6 +2,21 @@
 
 ![PyHT Logo](https://github.com/user-attachments/assets/bf1f9276-476e-4aab-964d-1eb864cb3676)
 
+## ⚠️ Legal Notice
+
+This software is designed for:
+- **Cybersecurity training**
+- **Red team exercises**
+- **Security research**
+- **Personal lab experiments**
+
+Any use on systems without **explicit permission** from the owner is **unauthorized** and may violate:
+- Computer Misuse Acts
+- Data Protection Regulations (e.g., GDPR)
+- Criminal Codes
+
+Use responsibly. You are solely responsible for your actions.
+
 ## Installation 
 
 ```bash
@@ -65,6 +80,28 @@ python3 main.py
 
 [![](https://github.com/user-attachments/assets/a2c4f5e6-553d-4752-ae1e-a3fec2bc09d0)]()
 
-> Comming soon...
+| Category               | Command Name                       | Description |
+|------------------------|------------------------------------|-------------|
+| 🧬 Persistence          | `Set Persistent`                   | Adds a registry key to auto-start on user login. |
+| 🖥️ Remote Access        | `Remote Desktop`                   | Deploys VNC server (UltraVNC) + ngrok tunnel for remote GUI access. |
+| 🧪 System Stress Test   | `Powershell Bomb`                  | Infinite PowerShell process spawner. Use only in lab. |
+|                        | `Disk Bomb`                        | Fills disk space with hidden 50MB files. Use only in lab. |
+| 💻 System Control       | `Reboot System`                    | Reboots the remote machine immediately. |
+|                        | `Shutdown System`                  | Shuts down the system immediately. |
+|                        | `Set Reboot Persistent`            | Adds script to force reboot on each user login. |
+| 🌍 Reconnaissance       | `Get Location`                     | Retrieves IP-based geolocation info. |
+|                        | `Get Clipboard`                    | Displays current clipboard content. |
+| ⌨️ Keystroke Capture    | `Keylogger`                        | Installs keylogger that emails captured keys. |
+| 📸 Visual Interaction   | `Make Screenshot`                  | Takes a screenshot and sends via email. |
+|                        | `Show pop-up window`               | Displays a custom message box on the remote system. |
+|                        | `Voice Message`                    | Converts text to voice and plays it on the target system. |
+| 🔐 Password Recovery    | `Firefox Passwords`                | Extracts saved passwords from Firefox. |
+|                        | `Chrome / Edge / etc. Passwords`   | Extracts saved passwords from Chromium-based browsers. |
+| 📦 Python Utilities     | `Install Python`                   | Downloads and installs Python 3 silently if not available. |
+| 🔒 File Encryption      | `Encrypt File(s)`                  | Encrypts specified files using Python script and fixed key. |
+|                        | `Encrypt All Files`                | Recursively encrypts user documents (txt, docx, pdf, etc.). |
+|                        | `Encrypt All Files with Alert`     | Same as above + warning pop-up and voice message. |
+|                        | `List Encrypted File(s)`           | Displays a log of previously encrypted files. |
+|                        | `Decrypt File(s)`                  | Decrypts previously encrypted files using the same key. |
 
 
