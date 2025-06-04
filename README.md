@@ -86,7 +86,7 @@ sudo python3 main.py
 
 ## Command & Control (C2)
 
-[![](https://github.com/user-attachments/assets/a2c4f5e6-553d-4752-ae1e-a3fec2bc09d0)]()
+[![](https://github.com/user-attachments/assets/a2c4f5e6-553d-4752-ae1e-a3fec2bc09d0)](https://youtu.be/6YO16RgJ9vU)
 
 | Category               | Command Name                       | Description |
 |------------------------|------------------------------------|-------------|
