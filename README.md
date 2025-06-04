@@ -17,10 +17,10 @@ Any use on systems without **explicit permission** from the owner is **unauthori
 
 Use responsibly. You are solely responsible for your actions.
 
-## Installation 
+## Installation (Only Debian)
 
 ```bash
-sudo apt update && sudo apt upgrade -y
+sudo apt update && sudo apt upgrade -y && sudo apt install python3-pip python3-tk macchanger git -y
 ```
 
 ```bash
@@ -29,11 +29,11 @@ cd PyHT-Python-Hacking-Toolkit
 ```
 
 ```bash
-python3 -m venv venv && source venv/bin/activate && pip3 install -r requirements.txt
+sudo pip3 install -r requirements.txt --break-system-packages
 ```
 
 ```bash
-python3 main.py
+sudo python3 main.py
 ```
 
 ## Port Scanner
